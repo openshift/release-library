@@ -1,6 +1,6 @@
 #!/usr/bin/groovy
 
-def call(Object ctx, String buildName, Object createFn) {
+def call(Object ctx, String buildName, Object createFn, int timeOutSecs = 3600) {
   ctx.openshift.withCluster() {
     def build = ctx.openshift.selector('build', buildName)
     def buildObject = null
@@ -13,6 +13,6 @@ def call(Object ctx, String buildName, Object createFn) {
       deleteBuild(ctx, buildName)
     }
     createFn()
-    waitForBuild(ctx, buildName)
+    waitForBuild(ctx, buildName, timeOutSecs)
   }
 }
