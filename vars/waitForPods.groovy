@@ -8,12 +8,14 @@ def call(Object ctx, Object selector, int timeOutSecs=300) {
       ctx.error("no pods found matching selector ${selector}")
       return
     }
+
+    echo "Waiting for pods ${names} to finish"
     ctx.timeout(time: timeOutSecs, unit: 'SECONDS') {
       pods.untilEach(names.size()) {
         def phase = it.object().status.phase
-        return phase != "Pending" && phase != "Running" 
+        return phase != "Pending" && phase != "Running"
       }
-    } 
+    }
     def failedCount = 0
     pods.withEach {
       def phase = it.object().status.phase

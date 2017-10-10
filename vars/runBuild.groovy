@@ -3,7 +3,7 @@
 def call(Object ctx, String buildConfigName) {
   def build
   ctx.openshift.withCluster() {
-    def buildConfig 
+    def buildConfig
     try {
         buildConfig = ctx.openshift.selector("buildconfig", buildConfigName).object()
     } catch(e) {
@@ -13,6 +13,7 @@ def call(Object ctx, String buildConfigName) {
         ctx.error("Cannot find buildconfig ${buildConfigName}")
     }
     build = ctx.openshift.selector("buildconfig", buildConfigName).startBuild()
+    echo "Started build for ${buildConfigName}: ${build.name()}"
 
     def waitForLogs = 10
     def done = false

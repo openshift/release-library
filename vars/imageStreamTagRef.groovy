@@ -24,5 +24,6 @@ def call(Object ctx, String imageStreamName, String tag) {
   if (ref == null) {
     ctx.error("image stream tag ${imageStreamName}:${tag} not found")
   }
+  echo "Determined ImageStreamTag ${imageStreamName}:${tag} to refer to ${ref}"
   return ref
 }
