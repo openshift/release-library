@@ -30,5 +30,6 @@ def call(Object ctx, String imageStreamName, String tag) {
   ctx.openshift.withCluster() {
     exists = tagExists(ctx, imageStreamName, tag)
   }
+  echo "ImageStreamTag ${imageStreamName} exists: ${exists}"
   return exists
 }
