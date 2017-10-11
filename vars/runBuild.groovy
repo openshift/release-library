@@ -25,7 +25,7 @@ def call(Object ctx, String buildConfigName) {
             // Most likely the logs command timed out
             ctx.echo "Retrying ${build.name()} logs in ${waitForLogs} seconds"
             ctx.sleep waitForLogs
-            waitForLogs *= 1.3
+            waitForLogs = (waitForLogs * 13)/10
             continue
         }
     }
