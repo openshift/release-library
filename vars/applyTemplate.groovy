@@ -11,9 +11,11 @@ def call(Object ctx, String path, Object... params) {
     args.add("-p")
     args.add(p)
   }
-
+  
+  def result = null
   ctx.openshift.withCluster() {
     def objects = invokeProcess(ctx, args)
-    ctx.openshift.apply(objects)
+    result = ctx.openshift.apply(objects)
   }
+  return result
 }
