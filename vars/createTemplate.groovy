@@ -9,7 +9,7 @@ def call(Object ctx, String path, Object... params) {
   def args = ["-f", path]
   for (p in params) {
     args.add("-p")
-    args.add(p)
+    args.add("'${p}'")
   }
 
   def result = null
