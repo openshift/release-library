@@ -17,6 +17,11 @@ def call(Object ctx, String buildName, int timeOutSecs = 600) {
           ctx.error("Build ${buildName} no longer exists")
           return
         }
+        def phase = build.object().status.phase
+        if (phase != "New" && phase != "Pending" && phase != "Running") {
+          // build has completed, exit this loop
+          return
+        }
         try {
             build.logs("-f")
             done=true
