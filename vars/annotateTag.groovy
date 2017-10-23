@@ -14,7 +14,7 @@ def call(Object ctx, String imageStream, tag, name, value) {
                tags[i].annotations = [:]
            }
            tags[i].annotations[name] = value
-           echo "Annotating ImageStreamTag ${is.name()}:${tags[i].name()} with ${name}=${value}"
+           ctx.echo "Annotating ImageStreamTag ${is.name()}:${tags[i].name} with ${name}=${value}"
            break
         }
     }

@@ -22,11 +22,16 @@ def call(Object ctx, String buildConfigName) {
             build.logs("-f")
             done=true
         } catch (e) {
-            // Most likely the logs command timed out
-            ctx.echo "Retrying ${build.name()} logs in ${waitForLogs} seconds"
-            ctx.sleep waitForLogs
-            waitForLogs = (waitForLogs * 13)/10
-            continue
+            def phase = build.object().status.phase
+            if (phase != "New" && phase != "Pending" && phase != "Running") {
+              // build has completed, exit this loop
+              done=true
+            } else {
+              // Most likely the logs command timed out
+              ctx.echo "Retrying ${build.name()} logs in ${waitForLogs} seconds"
+              ctx.sleep waitForLogs
+              waitForLogs = (waitForLogs * 13)/10
+            }
         }
     }
     build.watch {
