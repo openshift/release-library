@@ -12,6 +12,6 @@ def call(Object ctx) {
   if (originURL) {
     originURLFlag = "--source-url=${originURL}"
   }
-  hash = ctx.sh(script: "release-ci refhash ${originURLFlag} ${params.PULL_REFS}", returnStdout: true).trim()
+  hash = ctx.sh(script: "${releaseCIPath()} refhash ${originURLFlag} ${params.PULL_REFS}", returnStdout: true).trim()
   return hash
 }

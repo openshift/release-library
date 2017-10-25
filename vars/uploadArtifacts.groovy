@@ -22,7 +22,7 @@ s%\\"configuration-file\\":.*%\\"configuration-file\\": \\"${curDir}/job-config.
     "PULL_NUMBER=${params.PULL_NUMBER}",
     "PULL_PULL_SHA=${params.PULL_PULL_SHA}"
   ]) {
-    ctx.sh "release-ci save-config --config-path \"${curDir}/logging-config.json\""
+    ctx.sh "${releaseCIPath()} save-config --config-path \"${curDir}/logging-config.json\""
   }
-  ctx.sh "release-ci upload --config-path \"${curDir}/logging-config.json\""
+  ctx.sh "${releaseCIPath()} upload --config-path \"${curDir}/logging-config.json\""
 }
