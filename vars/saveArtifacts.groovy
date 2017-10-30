@@ -38,7 +38,7 @@ def call(Object ctx, String artifactDir, Object selector) {
         runCommand(ctx, "oc logs ${name} > ${artifactDir}/${objectName}.log")
         def podName = it.object().metadata.annotations['openshift.io/build.pod-name']
         if (podName != null && podName != "") {
-          def buildPod = openshift.selector("pod/${podName}")
+          def buildPod = ctx.openshift.selector("pod/${podName}")
           if (buildPod.exists()) {
             runCommand(ctx, "oc get pod/${podName} -o yaml > ${artifactDir}/${podName}.yaml")
             runCommand(ctx, "oc describe pod/${podName} > ${artifactDir}/${podName}.description")
