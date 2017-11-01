@@ -31,10 +31,10 @@ def call(Object ctx, String artifactDir, Object selector) {
       def objectType = name.tokenize("/")[0]
       runCommand(ctx, "oc get ${name} -o yaml > ${artifactDir}/${objectName}.yaml")
       runCommand(ctx, "oc describe ${name} > ${artifactDir}/${objectName}.description")
-      if (objectType == "pods") {
+      if (objectType == "pod" || objectType == "pods") {
         def pod = it.object()
         savePodContainerLogs(ctx, artifactDir, name, objectName, pod)
-      } else if (objectType == "build") {
+      } else if (objectType == "build" || objectType == "builds") {
         runCommand(ctx, "oc logs ${name} > ${artifactDir}/${objectName}.log")
         def podName = it.object().metadata.annotations['openshift.io/build.pod-name']
         if (podName != null && podName != "") {
