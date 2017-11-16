@@ -17,6 +17,7 @@ def call(ctx, jobName, jobId, buildName, toTag, dockerfile) {
     }
     buildSpec.triggers = [:]
     buildSpec.strategy.dockerStrategy.forcePull = true
+    buildSpec.strategy.dockerStrategy.noCache = true
     def build = [
       "kind": "Build",
       "metadata": [
