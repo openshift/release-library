@@ -20,7 +20,7 @@ def call(ctx, jobName, jobId, buildName, toTag, dockerfile) {
     def build = [
       "kind": "Build",
       "metadata": [
-        "name": "${jobName}-${jobId}",
+        "name": "${jobName}-${buildName}",
         "labels": [
           "job": "${jobName}",
           "job-id": "${jobId}",
@@ -29,9 +29,7 @@ def call(ctx, jobName, jobId, buildName, toTag, dockerfile) {
       ],
       "spec": buildSpec
     ]
-    ctx.runAndWaitForBuild(ctx,
-      build.metadata.name,
-      { return ctx.openshift.apply(build) }
-    )
+    def buildJSON = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(build))
+    ctx.runConcurrentBuild(ctx, buildJSON)
   }
 }
