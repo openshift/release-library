@@ -5,7 +5,8 @@ def call(String jobName, CloneStep cloneStep, java.util.ArrayList<BuildStep> bui
     agent any
 
     parameters {
-      string(name: "buildId")
+      string(name: "BUILD_ID")
+      string(name: "JOB_SPEC")
       string(name: "REPO_OWNER")
       string(name: "REPO_NAME")
       string(name: "PULL_REFS")
