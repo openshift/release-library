@@ -13,7 +13,11 @@ def call(Object ctx, Object selector, int timeOutSecs=300) {
       try {
         if (builds.count() > 0) {
           hasArtifacts = true
-          saveArtifacts(ctx, artifactDir, builds)
+          try {
+            saveArtifacts(ctx, artifactDir, builds)
+          } catch (eee) {
+            ctx.echo "Error saving build artifacts: ${eee}"
+          }
           builds.delete()
         }
       } catch (ee) {
@@ -23,7 +27,11 @@ def call(Object ctx, Object selector, int timeOutSecs=300) {
       try {
         if (pods.count() > 0) {
           hasArtifacts = true
-          saveArtifacts(ctx, artifactDir, pods)
+          try {
+            saveArtifacts(ctx, artifactDir, pods)
+          } catch (eee) {
+            ctx.echo "Error saving pod artifacts: ${eee}"
+          }
           pods.delete()
         }
       } catch (ee) {
