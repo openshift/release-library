@@ -36,14 +36,18 @@ def call(Object ctx, String artifactDir, Object selector) {
         savePodContainerLogs(ctx, artifactDir, name, objectName, pod)
       } else if (objectType == "build" || objectType == "builds") {
         runCommand(ctx, "oc logs ${name} > ${artifactDir}/${objectName}.log")
-        def podName = it.object().metadata.annotations['openshift.io/build.pod-name']
-        if (podName != null && podName != "") {
-          def buildPod = ctx.openshift.selector("pod/${podName}")
-          if (buildPod.exists()) {
-            runCommand(ctx, "oc get pod/${podName} -o yaml > ${artifactDir}/${podName}.yaml")
-            runCommand(ctx, "oc describe pod/${podName} > ${artifactDir}/${podName}.description")
-            savePodContainerLogs(ctx, artifactDir, "pod/${podName}", podName, buildPod.object())
+        try {
+          def podName = it.object().metadata.annotations['openshift.io/build.pod-name']
+          if (podName != null && podName != "") {
+            def buildPod = ctx.openshift.selector("pod/${podName}")
+            if (buildPod.exists()) {
+              runCommand(ctx, "oc get pod/${podName} -o yaml > ${artifactDir}/${podName}.yaml")
+              runCommand(ctx, "oc describe pod/${podName} > ${artifactDir}/${podName}.description")
+              savePodContainerLogs(ctx, artifactDir, "pod/${podName}", podName, buildPod.object())
+            }
           }
+        } catch (e) {
+          echo "Cannot get pod logs for build ${name}: ${e}"
         }
       }
     }
