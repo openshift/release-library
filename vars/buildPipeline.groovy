@@ -34,16 +34,20 @@ def call(String jobName, CloneStep cloneStep, java.util.ArrayList<BuildStep> bui
         }
       }
       stage("Clone Source") {
-        when { not { expression { return imageStreamTagExists(this, "${this._buildName}", cloneStep.ToTag()) } } }
         steps {
-          cloneStep.LaunchBuild(this, this._buildName, this._jobId, params.REPO_OWNER, params.REPO_NAME, params.PULL_REFS)
+          if (!imageStreamTagExists(this, "${this._buildName}", cloneStep.ToTag())) {
+            cloneStep.LaunchBuild(this, this._buildName, this._jobId, params.REPO_OWNER, params.REPO_NAME, params.PULL_REFS)
+          }
         }
       }
-      for(step in buildSteps) {
-        stage(step.Name()) {
-          when { not { expression { return imageStreamTagExists(this, "${this._buildName}", step.ToTag()) } } }
-          steps {
-            step.LaunchBuild(this, this._buildName, this._jobId)
+      stage("Build Images") {
+        steps {
+          script {
+            for(step in buildSteps) {
+              if (!imageStreamTagExists(this, "${this._buildName}", step.ToTag())) {
+                step.LaunchBuild(this, this._buildName, this._jobId)
+              }
+            }
           }
         }
       }
