@@ -31,7 +31,7 @@ def call(String jobName, String buildJobName, String baseTag, String args, Strin
             for (def param in params) {
               buildParams.add([$class: "StringParameterValue", name: param.key, value: param.value])
             }
-            build job: buildJobName, parameters: buildParams, wait: false
+            build job: buildJobName, parameters: buildParams, wait: true
           }
         }
       }
