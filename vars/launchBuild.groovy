@@ -1,10 +1,10 @@
 #!/usr/bin/groovy
 
-def call(ctx, jobName, jobId, buildName, toTag, dockerfile) {
+def call(ctx, toTag, dockerfile) {
   ctx.openshift.withCluster() {
     def output = ctx.openshift.raw("new-build",
       "--dockerfile", "'${dockerfile}'",
-      "--to", "${buildName}:${toTag}",
+      "--to", "${ctx._buildName}:${toTag}",
       "--output", "json", "--dry-run",
     ).out
     output = new groovy.json.JsonSlurperClassic().parseText(output)
@@ -21,11 +21,11 @@ def call(ctx, jobName, jobId, buildName, toTag, dockerfile) {
     def build = [
       "kind": "Build",
       "metadata": [
-        "name": "${jobName}-${buildName}",
+        "name": "${toTag}-${buildName}",
         "labels": [
-          "job": "${jobName}",
-          "job-id": "${jobId}",
-          "build": "${buildName}",
+          "job": "${toTag}",
+          "job-id": "${ctx._jobId}",
+          "build": "${ctx._buildName}",
         ]
       ],
       "spec": buildSpec
