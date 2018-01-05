@@ -60,12 +60,12 @@ class OpenShiftUtilities implements Serializable {
    * but _must_ be called within a cluster and project context.
    */
   static void WaitForImageStreamTag(Object ctx, Object imageStream, String requestedTag) {
-    String name = imageStream.object().metadata.name
     ctx.timeout(time: 1, unit: 'HOURS') {
       while (!imageStream.exists()) {
-        ctx.echo "WaitForImageStreamTag: waiting for ImageStream ${name} to exist"
+        ctx.echo "WaitForImageStreamTag: waiting for ImageStream to exist"
         ctx.sleep 30
       }
+      String name = imageStream.object().metadata.name
       ctx.echo "WaitForImageStreamTag: waiting for ImageStreamTag ${name}:${requestedTag} to exist"
       imageStream.watch {
         for (tag in it.object().status.tags) {
