@@ -1,6 +1,17 @@
 #!/usr/bin/groovy
+import com.redhat.openshift.BuildPipelineConfiguration
 
-def call(String jobName, CloneStep cloneStep, java.util.ArrayList<BuildStep> buildSteps) {
+import static com.redhat.openshift.BuildUtilities.EnsureImageStream
+import static com.redhat.openshift.CleanupUtilities.CleanupArtifacts
+import static com.redhat.openshift.CleanupUtilities.DeleteWorkspace
+import static com.redhat.openshift.GCSUtilities.GenerateStartedMetadata
+import static com.redhat.openshift.GCSUtilities.UploadArtifacts
+import static com.redhat.openshift.OpenShiftUtilities.Exists
+import static com.redhat.openshift.ReleaseUtilities.*
+import static com.redhat.openshift.TestUtilities.EnsureLoggingComponents
+import static com.redhat.openshift.TestUtilities.NewInfoCache
+
+def call(BuildPipelineConfiguration buildPipelineConfiguration) {
   pipeline {
     agent any
 
@@ -17,36 +28,63 @@ def call(String jobName, CloneStep cloneStep, java.util.ArrayList<BuildStep> bui
     }
 
     stages {
-      stage ("Configure Variables") {
+      stage("Configure Variables") {
         steps {
           script {
-            this._buildName = buildName(this)
-            this._jobId = "${jobName}-${this._buildName}-${env.BUILD_NUMBER}"
+            this._info = NewInfoCache(this, env)
           }
         }
       }
-      stage ("Ensure logging components exist") { steps {
-          ensureLoggingComponents(this)
-        }
-      }
-      stage ("Create ImageStream") { steps {
-          ensureImageStream(this, "${this._buildName}")
-        }
-      }
-      stage("Clone Source") {
+      stage("Ensure logging components exist") {
         steps {
-          if (!imageStreamTagExists(this, "${this._buildName}", cloneStep.ToTag())) {
-            cloneStep.LaunchBuild(this, params.REPO_OWNER, params.REPO_NAME, params.PULL_REFS)
+          script {
+            EnsureLoggingComponents(this)
           }
         }
       }
-      stage("Build Pipeline Images") {
+      stage("Generate Started Metadata") {
         steps {
           script {
-            for(step in buildSteps) {
-              if (!imageStreamTagExists(this, "${this._buildName}", step.ToTag())) {
-                step.LaunchBuild(this)
-              }
+            GenerateStartedMetadata(this)
+            UploadArtifacts(this, env)
+          }
+        }
+      }
+      stage("Create ImageStream") {
+        steps {
+          script {
+            EnsureImageStream(this, this._info)
+          }
+        }
+      }
+      stage("Run Configured Steps") {
+        steps {
+          script {
+            buildPipelineConfiguration.Run(this, env, this._info)
+          }
+        }
+      }
+      stage("Create Image Namespace") {
+        steps {
+          script {
+            EnsureReleaseNamespace(this, this._info)
+          }
+        }
+      }
+      stage("Tag Images") {
+        steps {
+          script {
+            if (!Exists(this, "ConfigMap", this._info.BuildName)) {
+              TagFullRelease(this, this._info, buildPipelineConfiguration.tagSpecification)
+            }
+          }
+        }
+      }
+      stage("Create Build Result ConfigMap") {
+        steps {
+          script {
+            if (!Exists(this, "ConfigMap", this._info.BuildName)) {
+              CreateBuildConfigMap(this, this._info)
             }
           }
         }
@@ -54,8 +92,8 @@ def call(String jobName, CloneStep cloneStep, java.util.ArrayList<BuildStep> bui
     }
     post {
       always {
-        cleanupArtifacts(this, ["job-id": "${this._jobId}"])
-        deleteWorkspace(this)
+        CleanupArtifacts(this, env, this._info)
+        DeleteWorkspace(this)
       }
     }
   }
